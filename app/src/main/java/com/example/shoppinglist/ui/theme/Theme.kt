@@ -1,6 +1,5 @@
 package com.example.shoppinglist.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,33 +10,43 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+// Dark Color Scheme using the new Green Palette
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = GreenDarkPrimary,
+    onPrimary = GreenDarkOnPrimary,
+    primaryContainer = GreenDarkPrimaryContainer,
+    onPrimaryContainer = GreenDarkOnPrimaryContainer,
+    secondary = GreenDarkSecondary,
+    onSecondary = GreenDarkOnSecondary,
+    secondaryContainer = GreenDarkSecondaryContainer,
+    onSecondaryContainer = GreenDarkOnSecondaryContainer,
+    background = GreenDarkBackground,
+    onBackground = GreenDarkOnBackground,
+    surface = GreenDarkSurface,
+    onSurface = GreenDarkOnSurface
 )
 
+// Light Color Scheme using the new Green Palette
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = GreenLightPrimary,
+    onPrimary = GreenLightOnPrimary,
+    primaryContainer = GreenLightPrimaryContainer,
+    onPrimaryContainer = GreenLightOnPrimaryContainer,
+    secondary = GreenLightSecondary,
+    onSecondary = GreenLightOnSecondary,
+    secondaryContainer = GreenLightSecondaryContainer,
+    onSecondaryContainer = GreenLightOnSecondaryContainer,
+    background = GreenLightBackground,
+    onBackground = GreenLightOnBackground,
+    surface = GreenLightSurface,
+    onSurface = GreenLightOnSurface
 )
 
 @Composable
 fun ShoppingListTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -49,10 +58,10 @@ fun ShoppingListTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography, // Assuming Typography is defined in another file
+        shapes = Shapes, // Assuming Shapes is defined in another file
         content = content
     )
 }
