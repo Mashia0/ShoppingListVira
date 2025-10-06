@@ -109,8 +109,8 @@ fun MainNavigation() {
                 exitTransition = { fadeOut(animationSpec = tween(300)) }
             ) {
                 composable(Screen.Home.route) { ShoppingListApp() }
-                composable(Screen.Profile.route) { ProfileScreen() } // <-- Tidak perlu .screens lagi
-                composable(Screen.Settings.route) { SettingsScreen() } // <-- Tidak perlu .screens lagi
+                composable(Screen.Profile.route) { ProfileScreen() }
+                composable(Screen.Settings.route) { SettingsScreen() }
             }
         }
     }
