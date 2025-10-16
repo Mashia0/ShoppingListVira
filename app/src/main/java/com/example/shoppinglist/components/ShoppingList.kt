@@ -37,7 +37,7 @@ import com.example.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun ShoppingList(items: List<String>) {
+fun ShoppingList(items: List<String>, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -46,16 +46,15 @@ fun ShoppingList(items: List<String>) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items, key = { it }) { item ->
-            AnimatedShoppingListItem(item = item)
+            AnimatedShoppingListItem(item = item, onItemClick = onItemClick) // Kirim lambda ke item
         }
     }
 }
 
 @Composable
-fun AnimatedShoppingListItem(item: String) {
+fun AnimatedShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
     var isVisible by remember { mutableStateOf(false) }
 
-    // Trigger animasi saat item pertama kali muncul
     LaunchedEffect(item) {
         delay(100)
         isVisible = true
@@ -66,41 +65,28 @@ fun AnimatedShoppingListItem(item: String) {
         enter = fadeIn(animationSpec = tween(600)) +
                 expandVertically(animationSpec = tween(600))
     ) {
-        ShoppingListItem(item)
+        ShoppingListItem(item, onItemClick = onItemClick) // Kirim lambda ke item
     }
 }
 
 @Composable
-fun ShoppingListItem(item: String) {
+fun ShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
     var isSelected by remember { mutableStateOf(false) }
-    var isPressed by remember { mutableStateOf(false) }
 
-    // Animasi warna
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else if (isPressed) {
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
-        } else {
-            MaterialTheme.colorScheme.surface
-        },
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         animationSpec = tween(300),
         label = "backgroundColor"
     )
 
     val contentColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         animationSpec = tween(300),
         label = "contentColor"
     )
 
-    // Animasi elevasi
     val elevation by animateDpAsState(
-        targetValue = if (isPressed) 12.dp else if (isSelected) 8.dp else 4.dp,
+        targetValue = if (isSelected) 8.dp else 4.dp,
         animationSpec = tween(200),
         label = "elevation"
     )
@@ -113,9 +99,7 @@ fun ShoppingListItem(item: String) {
                 shape = RoundedCornerShape(16.dp),
                 clip = false
             )
-            .clickable {
-                isSelected = !isSelected
-            },
+            .clickable { onItemClick(item) }, // Panggil lambda saat item di-klik
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor,
@@ -155,7 +139,6 @@ fun ShoppingListItem(item: String) {
                 )
             }
 
-            // Nama item
             Text(
                 text = item,
                 style = MaterialTheme.typography.titleMedium,
@@ -163,9 +146,10 @@ fun ShoppingListItem(item: String) {
                 modifier = Modifier.weight(1f)
             )
 
-            // Icon status
             Surface(
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable { isSelected = !isSelected }, // Toggle status selected
                 shape = RoundedCornerShape(8.dp),
                 color = if (isSelected) {
                     MaterialTheme.colorScheme.primary
@@ -196,7 +180,7 @@ fun ShoppingListPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            ShoppingList(items = listOf("Susu Segar", "Roti Tawar", "Telur Ayam", "Apel Fuji", "Daging Sapi"))
+            ShoppingList(items = listOf("Susu Segar", "Roti Tawar", "Telur Ayam", "Apel Fuji", "Daging Sapi"), onItemClick = {})
         }
     }
 }
