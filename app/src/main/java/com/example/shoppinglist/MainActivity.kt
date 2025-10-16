@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.shoppinglist.components.ItemInput
@@ -37,16 +38,22 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingListApp(navController: NavController) {
+fun ShoppingListApp(
+    navController: NavController,
+    // Panggil ViewModel di sini
+    shoppingViewModel: ShoppingViewModel = viewModel()
+) {
     var newItemText by rememberSaveable { mutableStateOf("") }
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    val shoppingItems = remember { mutableStateListOf<String>() }
     var showDialog by remember { mutableStateOf(false) }
+
+    // Ambil "array" dari ViewModel
+    val shoppingItems = shoppingViewModel.shoppingItems
 
     val filteredItems by remember(searchQuery, shoppingItems) {
         derivedStateOf {
             if (searchQuery.isBlank()) {
-                shoppingItems.toList()
+                shoppingItems
             } else {
                 shoppingItems.filter { it.contains(searchQuery, ignoreCase = true) }
             }
@@ -94,11 +101,10 @@ fun ShoppingListApp(navController: NavController) {
                 confirmButton = {
                     Button(
                         onClick = {
-                            if (newItemText.isNotBlank()) {
-                                shoppingItems.add(0, newItemText)
-                                newItemText = ""
-                                showDialog = false
-                            }
+                            // Panggil fungsi addItem dari ViewModel untuk mengubah array
+                            shoppingViewModel.addItem(newItemText)
+                            newItemText = ""
+                            showDialog = false
                         }
                     ) {
                         Text("Tambah")
