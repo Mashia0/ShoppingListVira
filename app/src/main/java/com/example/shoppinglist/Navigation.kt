@@ -57,8 +57,14 @@ fun MainNavigation() {
                     selected = currentRoute == Screen.Settings.route,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        navController.navigate(Screen.Settings.route)
-                    }
+                        navController.navigate(Screen.Settings.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } // <-- Kurung kurawal penutup untuk onClick ditambahkan di sini
                 )
             }
         }
