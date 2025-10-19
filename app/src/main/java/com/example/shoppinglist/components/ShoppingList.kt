@@ -1,3 +1,5 @@
+// app/src/main/java/com/example/shoppinglist/components/ShoppingList.kt
+
 package com.example.shoppinglist.components
 
 import androidx.compose.animation.AnimatedVisibility
@@ -33,11 +35,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.shoppinglist.ShoppingItem // Import data class baru
 import com.example.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun ShoppingList(items: List<String>, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
+fun ShoppingList(items: List<ShoppingItem>, onItemClick: (String) -> Unit) { // Terima List<ShoppingItem> dan ID (String)
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -45,17 +48,17 @@ fun ShoppingList(items: List<String>, onItemClick: (String) -> Unit) { // Tambah
         contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(items, key = { it }) { item ->
-            AnimatedShoppingListItem(item = item, onItemClick = onItemClick) // Kirim lambda ke item
+        items(items, key = { it.id }) { item -> // Key sekarang adalah item.id
+            AnimatedShoppingListItem(item = item, onItemClick = onItemClick) // Kirim seluruh item
         }
     }
 }
 
-@Composable
-fun AnimatedShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
+@Composable // <-- TAMBAHAN YANG HILANG
+fun AnimatedShoppingListItem(item: ShoppingItem, onItemClick: (String) -> Unit) { // Terima ShoppingItem
     var isVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(item) {
+    LaunchedEffect(item.id) { // Gunakan item.id sebagai key
         delay(100)
         isVisible = true
     }
@@ -65,12 +68,12 @@ fun AnimatedShoppingListItem(item: String, onItemClick: (String) -> Unit) { // T
         enter = fadeIn(animationSpec = tween(600)) +
                 expandVertically(animationSpec = tween(600))
     ) {
-        ShoppingListItem(item, onItemClick = onItemClick) // Kirim lambda ke item
+        ShoppingListItem(item = item, onItemClick = onItemClick) // Kirim seluruh item
     }
 }
 
 @Composable
-fun ShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan parameter onItemClick
+fun ShoppingListItem(item: ShoppingItem, onItemClick: (String) -> Unit) { // Terima ShoppingItem
     var isSelected by remember { mutableStateOf(false) }
 
     val backgroundColor by animateColorAsState(
@@ -99,7 +102,7 @@ fun ShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan
                 shape = RoundedCornerShape(16.dp),
                 clip = false
             )
-            .clickable { onItemClick(item) }, // Panggil lambda saat item di-klik
+            .clickable { onItemClick(item.id) }, // Kirim item.id saat diklik
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor,
@@ -133,18 +136,26 @@ fun ShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = item.firstOrNull()?.uppercase() ?: "?",
+                    text = item.name.firstOrNull()?.uppercase() ?: "?", // Gunakan item.name
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
-            Text(
-                text = item,
-                style = MaterialTheme.typography.titleMedium,
-                color = contentColor,
-                modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name, // Tampilkan nama
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor
+                )
+                if (item.details.isNotBlank()) {
+                    Text(
+                        text = item.details, // Tampilkan detail
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
 
             Surface(
                 modifier = Modifier
@@ -170,7 +181,7 @@ fun ShoppingListItem(item: String, onItemClick: (String) -> Unit) { // Tambahkan
             }
         }
     }
-}
+} // <-- KURUNG KURAWAL YANG HILANG KEMUNGKINAN DI SINI
 
 @Preview(showBackground = true)
 @Composable
@@ -180,7 +191,12 @@ fun ShoppingListPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            ShoppingList(items = listOf("Susu Segar", "Roti Tawar", "Telur Ayam", "Apel Fuji", "Daging Sapi"), onItemClick = {})
+            val dummyItems = listOf(
+                ShoppingItem(name = "Susu Segar", details = "1 Liter"),
+                ShoppingItem(name = "Roti Tawar", details = " "),
+                ShoppingItem(name = "Telur Ayam", details = "1 pack (10 buah)")
+            )
+            ShoppingList(items = dummyItems, onItemClick = {})
         }
     }
 }

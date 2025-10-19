@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -41,9 +42,10 @@ class MainActivity : ComponentActivity() {
 fun ShoppingListApp(
     navController: NavController,
     // Panggil ViewModel di sini
-    shoppingViewModel: ShoppingViewModel = viewModel()
+    shoppingViewModel: ShoppingViewModel
 ) {
     var newItemText by rememberSaveable { mutableStateOf("") }
+    var newItemDetails by rememberSaveable { mutableStateOf("") }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
 
@@ -55,7 +57,8 @@ fun ShoppingListApp(
             if (searchQuery.isBlank()) {
                 shoppingItems
             } else {
-                shoppingItems.filter { it.contains(searchQuery, ignoreCase = true) }
+                // Filter berdasarkan nama
+                shoppingItems.filter { it.name.contains(searchQuery, ignoreCase = true) }
             }
         }
     }
@@ -81,8 +84,9 @@ fun ShoppingListApp(
             Spacer(modifier = Modifier.height(16.dp))
             ShoppingList(
                 items = filteredItems,
-                onItemClick = { itemName ->
-                    navController.navigate(Screen.Detail.createRoute(itemName))
+                onItemClick = { itemId ->
+                    // Kirim ID item ke rute detail
+                    navController.navigate(Screen.Detail.createRoute(itemId))
                 }
             )
         }
@@ -92,18 +96,28 @@ fun ShoppingListApp(
                 onDismissRequest = { showDialog = false },
                 title = { Text("Tambah Item Baru") },
                 text = {
-                    OutlinedTextField(
-                        value = newItemText,
-                        onValueChange = { newItemText = it },
-                        label = { Text("Nama item") }
-                    )
+                    // Gunakan Column untuk dua input field
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = newItemText,
+                            onValueChange = { newItemText = it },
+                            label = { Text("Nama item") }
+                        )
+                        OutlinedTextField(
+                            value = newItemDetails,
+                            onValueChange = { newItemDetails = it },
+                            label = { Text("Detail (cth: 2 buah, di kulkas)") }
+                        )
+                    }
                 },
                 confirmButton = {
                     Button(
                         onClick = {
-                            // Panggil fungsi addItem dari ViewModel untuk mengubah array
-                            shoppingViewModel.addItem(newItemText)
+                            // Kirim nama dan detail ke ViewModel
+                            shoppingViewModel.addItem(newItemText, newItemDetails)
+                            // Reset kedua field
                             newItemText = ""
+                            newItemDetails = ""
                             showDialog = false
                         }
                     ) {
@@ -124,6 +138,10 @@ fun ShoppingListApp(
 @Composable
 fun ShoppingListAppPreview() {
     ShoppingListTheme {
-        ShoppingListApp(navController = rememberNavController())
+        // Beri ViewModel kosong untuk preview
+        ShoppingListApp(
+            navController = rememberNavController(),
+            shoppingViewModel = ShoppingViewModel()
+        )
     }
 }

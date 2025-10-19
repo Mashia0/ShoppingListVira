@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -26,8 +27,9 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Home : Screen("home", "Home", Icons.Default.Home)
     object Profile : Screen("profile", "Profile", Icons.Default.Person)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
-    object Detail : Screen("detail/{itemName}", "Detail", Icons.Default.Home) {
-        fun createRoute(itemName: String) = "detail/$itemName"
+    // Ubah rute untuk menerima itemId
+    object Detail : Screen("detail/{itemId}", "Detail", Icons.Default.Home) {
+        fun createRoute(itemId: String) = "detail/$itemId" // Terima itemId
     }
 }
 
@@ -44,6 +46,9 @@ fun MainNavigation() {
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // Buat ViewModel di sini SATU KALI
+    val shoppingViewModel: ShoppingViewModel = viewModel()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -64,7 +69,7 @@ fun MainNavigation() {
                             launchSingleTop = true
                             restoreState = true
                         }
-                    } // <-- Kurung kurawal penutup untuk onClick ditambahkan di sini
+                    }
                 )
             }
         }
@@ -125,16 +130,25 @@ fun MainNavigation() {
                 enterTransition = { fadeIn(animationSpec = tween(300)) },
                 exitTransition = { fadeOut(animationSpec = tween(300)) }
             ) {
-                composable(Screen.Home.route) { ShoppingListApp(navController = navController) }
+                composable(Screen.Home.route) {
+                    ShoppingListApp(
+                        navController = navController,
+                        shoppingViewModel = shoppingViewModel
+                    )
+                }
                 composable(Screen.Profile.route) { ProfileScreen() }
-                composable(Screen.Settings.route) { SettingsScreen() }
+                composable(Screen.Settings.route) {
+                    SettingsScreen(shoppingViewModel = shoppingViewModel)
+                }
                 composable(
-                    route = Screen.Detail.route,
-                    arguments = listOf(navArgument("itemName") { type = NavType.StringType })
+                    route = Screen.Detail.route, // Rute sudah diubah
+                    arguments = listOf(navArgument("itemId") { type = NavType.StringType }) // Argumen baru
                 ) { backStackEntry ->
+                    // Kirim ViewModel dan itemId ke DetailScreen
                     DetailScreen(
                         navController = navController,
-                        itemName = backStackEntry.arguments?.getString("itemName")
+                        itemId = backStackEntry.arguments?.getString("itemId"),
+                        viewModel = shoppingViewModel
                     )
                 }
             }
