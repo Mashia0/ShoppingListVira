@@ -40,7 +40,6 @@ fun ProfileScreen() {
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Foto Profil
             Image(
                 painter = painterResource(id = imageId),
                 contentDescription = "Foto Profil",
@@ -52,7 +51,6 @@ fun ProfileScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Card Informasi
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

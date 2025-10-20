@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ShoppingListApp(
     navController: NavController,
-    shoppingViewModel: ShoppingViewModel = viewModel() // Dapatkan ViewModel
+    shoppingViewModel: ShoppingViewModel = viewModel()
 ) {
     // State untuk setiap input field
     var name by rememberSaveable { mutableStateOf("") }
@@ -91,8 +91,7 @@ fun ShoppingListApp(
             Spacer(modifier = Modifier.height(16.dp))
             ShoppingList(
                 items = filteredItems,
-                onItemClick = { item -> // Terima objek ShoppingItem
-                    // Kirim ID unik dari item
+                onItemClick = { item ->
                     navController.navigate(Screen.Detail.createRoute(item.id))
                 }
             )
@@ -103,7 +102,6 @@ fun ShoppingListApp(
                 onDismissRequest = { showDialog = false },
                 title = { Text("Tambah Item Baru") },
                 text = {
-                    // Buat kolom input bisa di-scroll
                     Column(
                         modifier = Modifier.verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -155,10 +153,3 @@ fun ShoppingListApp(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ShoppingListAppPreview() {
-    ShoppingListTheme {
-        ShoppingListApp(navController = rememberNavController(), shoppingViewModel = ShoppingViewModel())
-    }
-}

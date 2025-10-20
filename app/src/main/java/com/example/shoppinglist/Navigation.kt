@@ -28,7 +28,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Home : Screen("home", "Home", Icons.Default.Home)
     object Profile : Screen("profile", "Profile", Icons.Default.Person)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
-    object Detail : Screen("detail/{itemId}", "Detail", Icons.Default.Home) { // Terima itemId
+    object Detail : Screen("detail/{itemId}", "Detail", Icons.Default.Home) {
         fun createRoute(itemId: String) = "detail/$itemId"
     }
 }
@@ -47,8 +47,6 @@ fun MainNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // Buat ViewModel di sini SATU KALI
     val shoppingViewModel: ShoppingViewModel = viewModel()
 
     ModalNavigationDrawer(
@@ -132,7 +130,7 @@ fun MainNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
                 composable(Screen.Home.route) {
                     ShoppingListApp(
                         navController = navController,
-                        shoppingViewModel = shoppingViewModel // Kirim ViewModel
+                        shoppingViewModel = shoppingViewModel
                     )
                 }
                 composable(Screen.Profile.route) { ProfileScreen() }
@@ -140,7 +138,7 @@ fun MainNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
                 composable(Screen.Settings.route) {
                     SettingsScreen(
                         shoppingViewModel = shoppingViewModel,
-                        settingsViewModel = settingsViewModel // <-- Tambahkan parameter ini
+                        settingsViewModel = settingsViewModel
                     )
                 }
                 composable(
@@ -150,7 +148,7 @@ fun MainNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
                     DetailScreen(
                         navController = navController,
                         itemId = backStackEntry.arguments?.getString("itemId"),
-                        viewModel = shoppingViewModel // Kirim ViewModel
+                        viewModel = shoppingViewModel
                     )
                 }
             }

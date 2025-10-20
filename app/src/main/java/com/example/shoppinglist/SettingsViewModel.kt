@@ -12,7 +12,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val themePreferenceManager = ThemePreferenceManager(application)
 
-    // StateFlow untuk menyimpan status dark mode yang bisa diobservasi
     val isDarkMode: StateFlow<Boolean> = themePreferenceManager.isDarkMode
         .stateIn(
             scope = viewModelScope,
@@ -20,7 +19,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             initialValue = false // Nilai awal sebelum DataStore dibaca
         )
 
-    // Fungsi untuk mengubah tema
     fun setDarkMode(isDarkMode: Boolean) {
         viewModelScope.launch {
             themePreferenceManager.setDarkMode(isDarkMode)

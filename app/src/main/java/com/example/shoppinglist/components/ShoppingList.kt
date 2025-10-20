@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-// import androidx.compose.material.icons.filled.ChevronRight // Tidak dipakai lagi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,8 +25,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.shoppinglist.ShoppingItem // Pastikan ini diimpor
-import com.example.shoppinglist.ShoppingViewModel // Import ViewModel untuk Preview
+import com.example.shoppinglist.ShoppingItem
+import com.example.shoppinglist.ShoppingViewModel
 import com.example.shoppinglist.ui.theme.ShoppingListTheme
 import kotlinx.coroutines.delay
 
@@ -91,21 +90,21 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = elevationDp, // Gunakan variabel Dp dari animateDpAsState
+                elevation = elevationDp,
                 shape = RoundedCornerShape(16.dp),
                 clip = false
             )
             .clickable {
                 isExpanded = !isExpanded
-                onItemClick(item) // Kirim seluruh objek item
+                onItemClick(item)
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor,
             contentColor = contentColor
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Elevation Card standar
-        border = BorderStroke( // BorderStroke untuk Card
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(
             width = 1.dp,
             color = if (isSelected) {
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
@@ -114,15 +113,15 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
             }
         )
     ) {
-        Column { // Bungkus dalam Column
+        Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, top = 20.dp, bottom = 20.dp, end = 20.dp), // Padding yang disesuaikan
+                    .padding(start = 20.dp, top = 20.dp, bottom = 20.dp, end = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Box Icon Huruf Depan
+
                 Box(
                     modifier = Modifier
                         .size(36.dp)
@@ -140,20 +139,18 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
                     )
                 }
 
-                // Text Nama Item
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = contentColor,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f) // Memenuhi sisa ruang
+                    modifier = Modifier.weight(1f)
                 )
 
-                // Surface Icon Check/Add
                 Surface(
                     modifier = Modifier
                         .size(32.dp)
-                        .clickable { isSelected = !isSelected }, // Toggle status selected
+                        .clickable { isSelected = !isSelected },
                     shape = RoundedCornerShape(8.dp),
                     color = if (isSelected) {
                         MaterialTheme.colorScheme.primary
@@ -171,10 +168,9 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
                         },
                         modifier = Modifier.padding(6.dp)
                     )
-                } // Akhir Surface Icon Check/Add
-            } // Akhir Row
+                }
+            }
 
-            // Detail yang bisa expand/collapse
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically(animationSpec = tween(300)),
@@ -183,10 +179,9 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, bottom = 20.dp), // Padding untuk detail
+                        .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    // Teks Merek/Ukuran
                     val brandAndSize = listOf(item.brand, item.size).filter { it.isNotBlank() }
                     if (brandAndSize.isNotEmpty()) {
                         Text(
@@ -195,7 +190,6 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
                             color = contentColor.copy(alpha = 0.8f)
                         )
                     }
-                    // Teks Catatan
                     if (item.details.isNotBlank()) {
                         Text(
                             text = item.details,
@@ -203,7 +197,6 @@ fun ShoppingListItem(item: ShoppingItem, onItemClick: (ShoppingItem) -> Unit) {
                             color = contentColor.copy(alpha = 0.6f)
                         )
                     }
-                    // Pesan jika tidak ada detail
                     if (brandAndSize.isEmpty() && item.details.isBlank()) {
                         Text(
                             text = "(Tidak ada detail tambahan)",
