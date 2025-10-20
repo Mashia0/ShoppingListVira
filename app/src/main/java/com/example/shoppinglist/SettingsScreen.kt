@@ -128,18 +128,4 @@ fun SettingsScreen(
     }
 }
 
-// Preview memerlukan Application context
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    // Buat kelas Application dummy hanya untuk preview
-    class PreviewApplication : Application()
 
-    ShoppingListTheme {
-        SettingsScreen(
-            shoppingViewModel = ShoppingViewModel(),
-            // Berikan instance SettingsViewModel dengan Application dummy
-            settingsViewModel = SettingsViewModel(PreviewApplication())
-        )
-    }
-}
