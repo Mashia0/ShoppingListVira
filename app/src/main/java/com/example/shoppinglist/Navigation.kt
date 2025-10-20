@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -22,14 +24,12 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 
-// Sealed class untuk merepresentasikan setiap layar
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Home : Screen("home", "Home", Icons.Default.Home)
     object Profile : Screen("profile", "Profile", Icons.Default.Person)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
-    // Ubah rute untuk menerima itemId
-    object Detail : Screen("detail/{itemId}", "Detail", Icons.Default.Home) {
-        fun createRoute(itemId: String) = "detail/$itemId" // Terima itemId
+    object Detail : Screen("detail/{itemId}", "Detail", Icons.Default.Home) { // Terima itemId
+        fun createRoute(itemId: String) = "detail/$itemId"
     }
 }
 
@@ -40,7 +40,8 @@ val bottomNavItems = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainNavigation() {
+
+fun MainNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -76,7 +77,6 @@ fun MainNavigation() {
     ) {
         Scaffold(
             topBar = {
-                // TopBar hanya muncul di layar non-detail
                 if (currentRoute != Screen.Detail.route) {
                     TopAppBar(
                         title = {
@@ -101,7 +101,6 @@ fun MainNavigation() {
                 }
             },
             bottomBar = {
-                // BottomBar hanya muncul di layar non-detail
                 if (currentRoute != Screen.Detail.route) {
                     NavigationBar {
                         val currentDestination = navBackStackEntry?.destination
@@ -133,22 +132,25 @@ fun MainNavigation() {
                 composable(Screen.Home.route) {
                     ShoppingListApp(
                         navController = navController,
-                        shoppingViewModel = shoppingViewModel
+                        shoppingViewModel = shoppingViewModel // Kirim ViewModel
                     )
                 }
                 composable(Screen.Profile.route) { ProfileScreen() }
+
                 composable(Screen.Settings.route) {
-                    SettingsScreen(shoppingViewModel = shoppingViewModel)
+                    SettingsScreen(
+                        shoppingViewModel = shoppingViewModel,
+                        settingsViewModel = settingsViewModel // <-- Tambahkan parameter ini
+                    )
                 }
                 composable(
-                    route = Screen.Detail.route, // Rute sudah diubah
-                    arguments = listOf(navArgument("itemId") { type = NavType.StringType }) // Argumen baru
+                    route = Screen.Detail.route,
+                    arguments = listOf(navArgument("itemId") { type = NavType.StringType })
                 ) { backStackEntry ->
-                    // Kirim ViewModel dan itemId ke DetailScreen
                     DetailScreen(
                         navController = navController,
                         itemId = backStackEntry.arguments?.getString("itemId"),
-                        viewModel = shoppingViewModel
+                        viewModel = shoppingViewModel // Kirim ViewModel
                     )
                 }
             }

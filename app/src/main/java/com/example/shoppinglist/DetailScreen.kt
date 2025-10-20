@@ -1,10 +1,6 @@
 package com.example.shoppinglist
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -20,15 +16,14 @@ import androidx.navigation.NavController
 fun DetailScreen(
     navController: NavController,
     itemId: String?,
-    viewModel: ShoppingViewModel // Terima ViewModel
+    viewModel: ShoppingViewModel
 ) {
-    // Ambil item dari ViewModel menggunakan ID
     val item = viewModel.getItemById(itemId)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(item?.name ?: "Detail Item") }, // Tampilkan nama item di judul
+                title = { Text(item?.name ?: "Detail Item") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
@@ -45,27 +40,66 @@ fun DetailScreen(
             contentAlignment = Alignment.TopStart
         ) {
             if (item != null) {
-                // Tampilkan nama dan detail
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
                         text = item.name,
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Text(
-                        text = item.details,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        InfoCard(label = "Merek", value = item.brand, modifier = Modifier.weight(1f))
+                        InfoCard(label = "Ukuran", value = item.size, modifier = Modifier.weight(1f))
+                    }
+                    if (item.details.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Catatan:",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = item.details,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else {
-                // Tampilkan pesan jika item tidak ditemukan
                 Text(
                     text = "Item tidak ditemukan",
                     style = MaterialTheme.typography.headlineMedium
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun InfoCard(label: String, value: String, modifier: Modifier = Modifier) {
+    if (value.isNotBlank()) {
+        Card(
+            modifier = modifier,
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    } else {
+        Spacer(modifier = modifier)
     }
 }

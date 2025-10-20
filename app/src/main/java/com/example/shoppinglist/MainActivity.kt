@@ -4,19 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.shoppinglist.components.ItemInput
 import com.example.shoppinglist.components.SearchInput
 import com.example.shoppinglist.components.ShoppingList
 import com.example.shoppinglist.ui.theme.ShoppingListTheme
@@ -25,12 +28,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ShoppingListTheme {
+            val settingsViewModel: SettingsViewModel = viewModel()
+            val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
+
+            ShoppingListTheme(darkTheme = isDarkMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainNavigation()
+                    MainNavigation(settingsViewModel = settingsViewModel)
                 }
             }
         }
@@ -41,15 +47,17 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ShoppingListApp(
     navController: NavController,
-    // Panggil ViewModel di sini
-    shoppingViewModel: ShoppingViewModel
+    shoppingViewModel: ShoppingViewModel = viewModel() // Dapatkan ViewModel
 ) {
-    var newItemText by rememberSaveable { mutableStateOf("") }
-    var newItemDetails by rememberSaveable { mutableStateOf("") }
+    // State untuk setiap input field
+    var name by rememberSaveable { mutableStateOf("") }
+    var brand by rememberSaveable { mutableStateOf("") }
+    var size by rememberSaveable { mutableStateOf("") }
+    var details by rememberSaveable { mutableStateOf("") }
+
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
 
-    // Ambil "array" dari ViewModel
     val shoppingItems = shoppingViewModel.shoppingItems
 
     val filteredItems by remember(searchQuery, shoppingItems) {
@@ -57,7 +65,6 @@ fun ShoppingListApp(
             if (searchQuery.isBlank()) {
                 shoppingItems
             } else {
-                // Filter berdasarkan nama
                 shoppingItems.filter { it.name.contains(searchQuery, ignoreCase = true) }
             }
         }
@@ -84,9 +91,9 @@ fun ShoppingListApp(
             Spacer(modifier = Modifier.height(16.dp))
             ShoppingList(
                 items = filteredItems,
-                onItemClick = { itemId ->
-                    // Kirim ID item ke rute detail
-                    navController.navigate(Screen.Detail.createRoute(itemId))
+                onItemClick = { item -> // Terima objek ShoppingItem
+                    // Kirim ID unik dari item
+                    navController.navigate(Screen.Detail.createRoute(item.id))
                 }
             )
         }
@@ -96,30 +103,44 @@ fun ShoppingListApp(
                 onDismissRequest = { showDialog = false },
                 title = { Text("Tambah Item Baru") },
                 text = {
-                    // Gunakan Column untuk dua input field
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Buat kolom input bisa di-scroll
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         OutlinedTextField(
-                            value = newItemText,
-                            onValueChange = { newItemText = it },
-                            label = { Text("Nama item") }
+                            value = name,
+                            onValueChange = { name = it },
+                            label = { Text("Nama Item*") }
                         )
                         OutlinedTextField(
-                            value = newItemDetails,
-                            onValueChange = { newItemDetails = it },
-                            label = { Text("Detail (cth: 2 buah, di kulkas)") }
+                            value = brand,
+                            onValueChange = { brand = it },
+                            label = { Text("Merek (Opsional)") }
+                        )
+                        OutlinedTextField(
+                            value = size,
+                            onValueChange = { size = it },
+                            label = { Text("Ukuran (Opsional, cth: 250gr)") }
+                        )
+                        OutlinedTextField(
+                            value = details,
+                            onValueChange = { details = it },
+                            label = { Text("Catatan (Opsional)") }
                         )
                     }
                 },
                 confirmButton = {
                     Button(
                         onClick = {
-                            // Kirim nama dan detail ke ViewModel
-                            shoppingViewModel.addItem(newItemText, newItemDetails)
-                            // Reset kedua field
-                            newItemText = ""
-                            newItemDetails = ""
+                            shoppingViewModel.addItem(name, brand, size, details)
+                            name = ""
+                            brand = ""
+                            size = ""
+                            details = ""
                             showDialog = false
-                        }
+                        },
+                        enabled = name.isNotBlank()
                     ) {
                         Text("Tambah")
                     }
@@ -138,10 +159,6 @@ fun ShoppingListApp(
 @Composable
 fun ShoppingListAppPreview() {
     ShoppingListTheme {
-        // Beri ViewModel kosong untuk preview
-        ShoppingListApp(
-            navController = rememberNavController(),
-            shoppingViewModel = ShoppingViewModel()
-        )
+        ShoppingListApp(navController = rememberNavController(), shoppingViewModel = ShoppingViewModel())
     }
 }
